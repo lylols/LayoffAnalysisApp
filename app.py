@@ -54,7 +54,7 @@ try:
     st.download_button("⬇️ Export to CSV", csv, file_name="main_query_result.csv", mime='text/csv')
 
     # SQL query
-    with st.expander("🧠 View SQL Query"):
+    with st.expander("View SQL Query"):
         st.code(main_q["sql_query"], language="sql")
 
     # Reasoning + Conclusion
@@ -95,7 +95,7 @@ if "follow_ups" in main_q:
         csv_follow = df.to_csv(index=False).encode('utf-8')
         st.download_button("⬇️ Export Follow-up Result", csv_follow, file_name="followup_result.csv", mime='text/csv')
 
-        with st.expander("🧠 View SQL Query"):
+        with st.expander("View SQL Query"):
             st.code(follow_q["sql_query"], language="sql")
 
         st.info("💡 Insight: " + follow_q.get("insight", "No insight provided."))
