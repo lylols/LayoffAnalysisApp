@@ -1,0 +1,79 @@
+[
+  {
+    "question": "Which month recorded the highest number of layoffs?",
+    "sql_query": "SELECT strftime('%Y-%m', Date) AS Month, COUNT(*) AS Total_Layoffs FROM layoffs GROUP BY Month ORDER BY Total_Layoffs DESC LIMIT 1;",
+    "insight": "This helps identify peak layoff periods which may indicate economic downturns or industry-wide corrections.",
+    "reasoning": "We used SQLite's `strftime` to group by year and month from the 'Date' column. The `COUNT(*)` calculates total layoff events per month.",
+    "conclusion": "This month experienced the most significant layoff events, possibly due to external economic pressures.",
+    "follow_ups": [
+      {
+        "question": "What were the top 5 months with the highest number of layoffs?",
+        "sql_query": "SELECT strftime('%Y-%m', Date) AS Month, COUNT(*) AS Total_Layoffs FROM layoffs GROUP BY Month ORDER BY Total_Layoffs DESC LIMIT 5;",
+        "insight": "These months reflect recurring trends or unusual spikes in job cuts."
+      },
+        {
+          "question": "What was the total number of layoffs in the top month?",
+          "sql_query": "SELECT strftime('%Y-%m', Date) AS Month, SUM(Laid_Off_Count) AS Total_Layoffs FROM layoffs GROUP BY Month ORDER BY Total_Layoffs DESC LIMIT 1;",
+          "insight": "This shows the peak layoff month with the total number of employees laid off.",
+          "conclusion": "The highest number of layoffs occurred in the given month, reflecting a major workforce reduction."
+        }
+    ]
+  },
+  {
+    "question": "Which company has laid off the most employees overall?",
+    "sql_query": "SELECT Company, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs GROUP BY Company ORDER BY Total_Laid_Off DESC LIMIT 1;",
+    "insight": "Identifies the single company with the largest cumulative layoffs.",
+    "reasoning": "We grouped all records by company and used SUM on the 'Laid_Off_Count' to find the total laid off per company.",
+    "conclusion": "This company has contributed the most to layoffs in the dataset.",
+    "follow_ups": [
+      {
+        "question": "Top 5 companies with the most layoffs?",
+        "sql_query": "SELECT Company, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs GROUP BY Company ORDER BY Total_Laid_Off DESC LIMIT 5;",
+        "insight": "These companies account for the highest layoff volumes and could represent industry leaders under stress."
+      },
+      {
+        "question": "Which industry do these top companies belong to?",
+        "sql_query": "SELECT Company, Industry FROM layoffs WHERE Company IN (SELECT Company FROM layoffs GROUP BY Company ORDER BY SUM(Laid_Off_Count) DESC LIMIT 5);",
+        "insight": "Links layoffs to industry trends, giving insight into which sectors were impacted most."
+      }
+    ]
+  },
+  {
+    "question": "Which industry saw the highest layoffs?",
+    "sql_query": "SELECT Industry, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs GROUP BY Industry ORDER BY Total_Laid_Off DESC LIMIT 1;",
+    "insight": "This highlights the most affected industry by total layoffs.",
+    "reasoning": "Grouping by 'Industry' and summing layoffs gives us the overall industry impact.",
+    "conclusion": "This industry suffered the most, possibly due to structural changes or reduced demand.",
+    "follow_ups": [
+      {
+        "question": "Top 3 industries affected the most?",
+        "sql_query": "SELECT Industry, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs GROUP BY Industry ORDER BY Total_Laid_Off DESC LIMIT 3;",
+        "insight": "Shows how layoffs were concentrated across industries."
+      },
+      {
+        "question": "Which company in that industry laid off the most?",
+        "sql_query": "SELECT Company, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs WHERE Industry = (SELECT Industry FROM layoffs GROUP BY Industry ORDER BY SUM(Laid_Off_Count) DESC LIMIT 1) GROUP BY Company ORDER BY Total_Laid_Off DESC LIMIT 1;",
+        "insight": "Pinpoints the leading contributor to layoffs in the most affected industry."
+      }
+    ]
+  },
+  {
+    "question": "Which country reported the highest layoffs?",
+    "sql_query": "SELECT Country, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs GROUP BY Country ORDER BY Total_Laid_Off DESC LIMIT 1;",
+    "insight": "This gives a global view of which nation experienced the most layoffs.",
+    "reasoning": "Grouped by country to identify national layoff impact.",
+    "conclusion": "The country with highest layoffs reflects either economic stress or data concentration.",
+    "follow_ups": [
+      {
+        "question": "Top 5 countries with highest layoffs?",
+        "sql_query": "SELECT Country, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs GROUP BY Country ORDER BY Total_Laid_Off DESC LIMIT 5;",
+        "insight": "These regions saw the most significant workforce reductions globally."
+      },
+      {
+        "question": "Which industry had the highest layoffs in that country?",
+        "sql_query": "SELECT Industry, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs WHERE Country = (SELECT Country FROM layoffs GROUP BY Country ORDER BY SUM(Laid_Off_Count) DESC LIMIT 1) GROUP BY Industry ORDER BY Total_Laid_Off DESC LIMIT 1;",
+        "insight": "Reveals industry-level impact for the most affected country."
+      }
+    ]
+  }
+]
