@@ -65,10 +65,14 @@ try:
             fig = px.bar(df, x=df.columns[0], y=df.columns[1], title="Graphical Representation")
         st.plotly_chart(fig)
 
+    # Reasoning + Conclusion
+    st.info("💡 Insight: " + question_data.get("insight", "No insight provided."))
+    st.success("✅ Conclusion: " + question_data.get("conclusion", "No conclusion provided."))
+
 except Exception as e:
     st.error(f"Error: {e}")
 
-# Follow-up Section (no insight/conclusion)
+# Follow-up Section
 follow_ups = question_data.get("follow_ups", [])
 if follow_ups:
     st.markdown("---")
@@ -106,6 +110,10 @@ if follow_ups:
                         else:
                             fig = px.bar(f_df, x=f_df.columns[0], y=f_df.columns[1], title="Follow-up Graph")
                         st.plotly_chart(fig)
+
+                    # Insight + Conclusion (Optional)
+                    st.info("💡 Insight: " + follow.get("insight", "No insight provided."))
+                    st.success("✅ Conclusion: " + follow.get("conclusion", "No conclusion provided."))
 
                 except Exception as e:
                     st.error(f"Follow-up query error: {e}")
