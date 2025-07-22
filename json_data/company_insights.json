@@ -1,0 +1,100 @@
+[
+  {
+    "category": "Company-Specific Insights",
+    "questions": [
+      {
+        "id": 1,
+        "question": "Which companies had the highest total layoffs overall?",
+        "sql_query": "SELECT Company, SUM(Laid_Off_Count) AS total FROM layoffs GROUP BY Company ORDER BY total DESC LIMIT 10;",
+        "answer": "Amazon, Meta, and Google top the list for highest total layoffs.",
+        "visualization": "bar_chart",
+        "follow_ups": [
+          {
+            "question": "What were the peak layoff periods for these companies?",
+            "sql_query": "SELECT Company, strftime('%Y-%m', Date) AS Month, SUM(Laid_Off_Count) AS layoffs FROM layoffs WHERE Company IN ('Amazon', 'Meta', 'Google') GROUP BY Company, Month ORDER BY Month;",
+            "answer": "Most peaks occurred in late 2022 and early 2023 as firms downsized post-pandemic.",
+            "visualization": "line_chart"
+          },
+          {
+            "question": "What were the industries of these companies?",
+            "sql_query": "SELECT DISTINCT Company, Industry FROM layoffs WHERE Company IN ('Amazon', 'Meta', 'Google');",
+            "answer": "All three operate primarily in the tech industry, with Amazon also in retail/logistics.",
+            "visualization": "table"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "question": "Which company had the most frequent layoffs?",
+        "sql_query": "SELECT Company, COUNT(*) AS event_count FROM layoffs GROUP BY Company ORDER BY event_count DESC LIMIT 1;",
+        "answer": "Meta experienced the most frequent layoffs, often in short intervals.",
+        "visualization": "bar_chart",
+        "follow_ups": [
+          {
+            "question": "What could frequent layoffs indicate about a company?",
+            "answer": "Frequent layoffs may suggest internal restructuring, funding issues, or unstable growth plans."
+          },
+          {
+            "question": "What were the intervals between these layoffs?",
+            "sql_query": "SELECT Company, Date FROM layoffs WHERE Company = 'Meta' ORDER BY Date;",
+            "answer": "Layoffs were observed every 3-6 months during 2022–2023.",
+            "visualization": "line_chart"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "question": "Which company had the highest percentage of workforce laid off in a single event?",
+        "sql_query": "SELECT Company, MAX(Percentage) AS max_percent FROM layoffs WHERE Percentage IS NOT NULL GROUP BY Company ORDER BY max_percent DESC LIMIT 1;",
+        "answer": "Better.com had a layoff event affecting over 70% of its staff.",
+        "visualization": "bar_chart",
+        "follow_ups": [
+          {
+            "question": "Why did this percentage spike happen?",
+            "answer": "This was due to severe funding cuts and the company’s pivot in business strategy."
+          },
+          {
+            "question": "Did the company recover from the layoff?",
+            "answer": "The recovery was partial, supported by leadership changes and external funding."
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "question": "Which company's layoffs spiked after major economic announcements?",
+        "sql_query": "SELECT Company, Date FROM layoffs WHERE strftime('%Y', Date) = '2023' ORDER BY Date DESC LIMIT 20;",
+        "answer": "Google and Microsoft saw layoffs shortly after major rate hikes and inflation warnings.",
+        "visualization": "table",
+        "follow_ups": [
+          {
+            "question": "Did these announcements affect the whole industry?",
+            "answer": "Yes, economic signals like interest hikes caused cost-cutting across multiple sectors."
+          },
+          {
+            "question": "Were these layoffs isolated or part of broader cuts?",
+            "answer": "They were part of broader industry-wide workforce reductions in tech."
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "question": "Which companies laid off employees from the most number of locations?",
+        "sql_query": "SELECT Company, COUNT(DISTINCT Location_HQ) AS location_count FROM layoffs GROUP BY Company ORDER BY location_count DESC LIMIT 10;",
+        "answer": "Amazon and Microsoft had layoffs spanning many global locations.",
+        "visualization": "bar_chart",
+        "follow_ups": [
+          {
+            "question": "What challenges do multi-location layoffs bring?",
+            "answer": "Legal, HR, and logistical complexities increase with global workforce cuts."
+          },
+          {
+            "question": "Were some locations hit more severely than others?",
+            "sql_query": "SELECT Company, Location_HQ, SUM(Laid_Off_Count) AS total FROM layoffs WHERE Company IN ('Amazon', 'Microsoft') GROUP BY Company, Location_HQ ORDER BY total DESC LIMIT 10;",
+            "answer": "Yes, US and Europe-based offices often saw higher layoff counts.",
+            "visualization": "table"
+          }
+        ]
+      }
+    ]
+  }
+]

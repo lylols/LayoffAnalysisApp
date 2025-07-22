@@ -2,112 +2,119 @@ import streamlit as st
 import pandas as pd
 import sqlite3
 import json
-from datetime import datetime
 import os
+import plotly.express as px
 
-# Paths
-json_path = os.path.join("json_data", "layoff_trends.json")
-db_path = "layoff.db"
+# Page setup
+st.set_page_config(page_title="Layoff Analysis App", layout="wide")
+st.title("Layoff Analysis Dashboard")
 
-# Load JSON
-with open(json_path, "r") as file:
-    trends_data = json.load(file)
+# Connect to database
+conn = sqlite3.connect("layoff.db")
 
-# Connect to SQLite DB
-conn = sqlite3.connect(db_path)
+# Dropdown: Category
+categories = {
+    "Layoff Trends": "layoff_trends.json",
+    "Company-Specific Insights": "company_insights.json",
+    "High-Risk Segments": "high_risk_segments.json"
+}
+selected_category = st.selectbox("Select Analysis Category", list(categories.keys()))
+st.markdown(f"**You selected: `{selected_category}`**")
 
-# App layout
-st.set_page_config(page_title="Layoff Trends Analysis", layout="wide")
-st.title("📉 Layoff Trends Dashboard")
-st.markdown("---")
+# Load JSON for selected category
+json_path = os.path.join("json_data", categories[selected_category])
+with open(json_path, "r", encoding="utf-8") as f:
+    data = json.load(f)
 
-# Dropdown for main questions
-main_question_titles = [q["question"] for q in trends_data]
-selected_main = st.selectbox("🔍 Select a main analysis question:", main_question_titles)
+# Select main question
+questions = []
+for category in data:
+    for q in category["questions"]:
+        questions.append(q["question"])
+selected_question = st.selectbox("Select a Question", questions)
 
-# Get selected question
-main_q = next(q for q in trends_data if q["question"] == selected_main)
+# Get selected question's data
+question_data = next(
+    q for cat in data for q in cat["questions"] if q["question"] == selected_question
+)
+
+query = question_data.get("sql_query")
 
 # Run main query
 try:
-    df = pd.read_sql_query(main_q["sql_query"], conn)
+    df = pd.read_sql_query(query, conn)
+    st.subheader("Result")
+    st.dataframe(df)
 
-    # Show result smartly
-    if "Month" in df.columns and len(df) == 1 and df.select_dtypes(include='number').shape[1] == 1:
-        month_val = df["Month"].iloc[0]
-        formatted = datetime.strptime(month_val, "%Y-%m").strftime("%B %Y")
-        st.write(f"📊 **Top Layoff Month**: {formatted}")
-    elif len(df) == 1 and df.shape[1] == 1:
-        col = df.columns[0]
-        val = df.iloc[0, 0]
-        st.write(f"📊 **Result**: {col} = {val}")
-    else:
-        st.dataframe(df)
+    # View SQL button
+    with st.expander("View SQL Query"):
+        st.code(query, language="sql")
 
-        # Visuals
-        if len(df) > 2 and df.select_dtypes(include='number').shape[1] == 1:
-            metric_col = df.select_dtypes(include='number').columns[0]
-            st.bar_chart(df.set_index(df.columns[0])[metric_col])
+    # Export CSV
+    if not df.empty:
+        csv = df.to_csv(index=False).encode("utf-8")
+        st.download_button("Download CSV", csv, file_name="result.csv", mime="text/csv")
 
-    # CSV Export
-    csv = df.to_csv(index=False).encode('utf-8')
-    st.download_button("⬇️ Export to CSV", csv, file_name="main_query_result.csv", mime='text/csv')
-
-    # SQL query
-    with st.expander("🧠 View SQL Query"):
-        st.code(main_q["sql_query"], language="sql")
-
-    # Reasoning + Conclusion
-    st.info("💡 Insight: " + main_q.get("insight", "No insight provided."))
-    st.success("✅ Conclusion: " + main_q.get("conclusion", "No conclusion provided."))
+    # Graph logic
+    if len(df) > 1 and len(df.columns) >= 2 and df[df.columns[1]].dtype in ["int64", "float64"]:
+        time_keywords = ["month", "year", "date"]
+        x_col = df.columns[0].lower()
+        if any(key in x_col for key in time_keywords):
+            fig = px.line(df, x=df.columns[0], y=df.columns[1], title="Trend Over Time")
+        else:
+            fig = px.bar(df, x=df.columns[0], y=df.columns[1], title="Graphical Representation")
+        st.plotly_chart(fig)
 
 except Exception as e:
-    st.error(f"Error in main question: {e}")
+    st.error(f"Error: {e}")
 
-# Follow-up Section
-if "follow_ups" in main_q:
+# Follow-up Section (no insight/conclusion)
+follow_ups = question_data.get("follow_ups", [])
+if follow_ups:
     st.markdown("---")
-    st.subheader("📌 Select a Follow-Up Question")
+    st.markdown("### Follow-Up Questions")
+    for i, follow in enumerate(follow_ups):
+        with st.expander(follow.get("question", f"Follow-Up {i+1}")):
 
-    follow_titles = [f["question"] for f in main_q["follow_ups"]]
-    selected_follow = st.selectbox("Follow-up Analysis:", follow_titles)
+            # Always show textual parts
+            answer = follow.get("answer", "").strip()
+            if answer:
+                st.markdown("*Answer:*")
+                st.write(answer)
 
-    follow_q = next(f for f in main_q["follow_ups"] if f["question"] == selected_follow)
+            # Try to show SQL/graph if query exists
+            f_query = follow.get("sql_query")
+            if f_query:
+                try:
+                    f_df = pd.read_sql_query(f_query, conn)
+                    st.dataframe(f_df)
 
-    try:
-        df = pd.read_sql_query(follow_q["sql_query"], conn)
+                    with st.expander("View SQL Query"):
+                        st.code(f_query, language="sql")
 
-        if "Month" in df.columns and len(df) == 1 and df.select_dtypes(include='number').shape[1] == 1:
-            month_val = df["Month"].iloc[0]
-            formatted = datetime.strptime(month_val, "%Y-%m").strftime("%B %Y")
-            st.write(f"📊 **Top Layoff Month**: {formatted}")
-        elif len(df) == 1 and df.shape[1] == 1:
-            col = df.columns[0]
-            val = df.iloc[0, 0]
-            st.write(f"📊 **Result**: {col} = {val}")
-        else:
-            st.dataframe(df)
+                    if not f_df.empty:
+                        f_csv = f_df.to_csv(index=False).encode("utf-8")
+                        st.download_button(
+                            "Download Follow-up CSV", f_csv,
+                            file_name=f"followup_{i}.csv", mime="text/csv"
+                        )
 
-            if len(df) > 2 and df.select_dtypes(include='number').shape[1] == 1:
-                metric_col = df.select_dtypes(include='number').columns[0]
-                st.bar_chart(df.set_index(df.columns[0])[metric_col])
+                    if len(f_df) > 1 and len(f_df.columns) >= 2 and f_df[f_df.columns[1]].dtype in ["int64", "float64"]:
+                        x_col = f_df.columns[0].lower()
+                        if any(key in x_col for key in ["month", "year", "date"]):
+                            fig = px.line(f_df, x=f_df.columns[0], y=f_df.columns[1], title="Trend Over Time")
+                        else:
+                            fig = px.bar(f_df, x=f_df.columns[0], y=f_df.columns[1], title="Follow-up Graph")
+                        st.plotly_chart(fig)
 
-        csv_follow = df.to_csv(index=False).encode('utf-8')
-        st.download_button("⬇️ Export Follow-up Result", csv_follow, file_name="followup_result.csv", mime='text/csv')
-
-        with st.expander("🧠 View SQL Query"):
-            st.code(follow_q["sql_query"], language="sql")
-
-        st.info("💡 Insight: " + follow_q.get("insight", "No insight provided."))
-        st.success("✅ Conclusion: " + follow_q.get("conclusion", "No conclusion provided."))
-
-    except Exception as e:
-        st.error(f"Error in follow-up: {e}")
+                except Exception as e:
+                    st.error(f"Follow-up query error: {e}")
 
 # Footer
-st.markdown("""
----
-<div style="text-align: center; font-size: 0.9em; color: gray;">
-    Layoff Trends Analysis App | Built by Shraddha Shrivastava
-</div>
-""", unsafe_allow_html=True)
+st.markdown("---")
+st.markdown(
+    "<div style='text-align: center; font-size: 14px;'>"
+    "Created by Shraddha • Powered by Streamlit • GitHub: <a href='https://github.com/lylols/LayoffAnalysisApp' target='_blank'>View Repo</a>"
+    "</div>",
+    unsafe_allow_html=True
+)

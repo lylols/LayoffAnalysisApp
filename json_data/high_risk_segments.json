@@ -1,0 +1,83 @@
+[
+  {
+    "category": "High-Risk Segments",
+    "questions": [
+      {
+        "id": 1,
+        "question": "Which companies have had multiple rounds of layoffs over time?",
+        "sql_query": "SELECT company, COUNT(*) AS layoff_events FROM layoffs GROUP BY company HAVING layoff_events > 1 ORDER BY layoff_events DESC LIMIT 10;",
+        "answer": "Meta, Amazon, and Twitter are among the companies with repeated rounds of layoffs, indicating prolonged instability.",
+        "visualization": "bar_chart",
+        "follow_ups": [
+          {
+            "question": "What was the trend of these repeated layoffs over time?",
+            "sql_query": "SELECT company, strftime('%Y-%m', date) AS Month, COUNT(*) AS events FROM layoffs GROUP BY company, Month HAVING events > 1 ORDER BY Month DESC LIMIT 20;",
+            "answer": "Repeated layoffs often clustered around economic downturns or major internal restructurings.",
+            "visualization": "line_chart"
+          },
+          {
+            "question": "Why are repeated layoffs concerning for stakeholders?",
+            "answer": "Repeated layoffs are troubling because they suggest a deeper underlying issue within the company. This could point to flawed strategic direction, poor financial planning, or ineffective leadership. For investors, such patterns erode confidence and may lead to stock volatility or withdrawal of funding. Employees may face constant job insecurity, leading to decreased morale and higher attrition of top talent."
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "question": "Which companies laid off the highest percentage of their workforce?",
+        "sql_query": "SELECT company, MAX(percentage) AS max_percent FROM layoffs WHERE percentage IS NOT NULL GROUP BY company ORDER BY max_percent DESC LIMIT 10;",
+        "answer": "Startups like Better.com and Klarna laid off over 50% of their workforce during certain events.",
+        "visualization": "bar_chart",
+        "follow_ups": [
+          {
+            "question": "Which month saw the highest percentage layoffs across companies?",
+            "sql_query": "SELECT strftime('%Y-%m', date) AS Month, MAX(percentage) AS Max_Percentage FROM layoffs GROUP BY Month ORDER BY Max_Percentage DESC LIMIT 5;",
+            "answer": "Peak layoffs by percentage were observed during early 2020 and late 2022, correlating with global market shocks.",
+            "visualization": "bar_chart"
+          },
+          {
+            "question": "Are such companies able to recover operationally after such massive cuts?",
+            "answer": "Recovering after large-scale layoffs is challenging and varies by company. While some manage to streamline and regain focus post-restructuring, others continue struggling due to lost talent and reputational damage. Operational recovery also depends on how layoffs were handled—transparent communication and employee support can ease transitions. Additionally, companies with solid business models and strong market demand tend to bounce back faster."
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "question": "Which industries are repeatedly impacted by layoffs across time?",
+        "sql_query": "SELECT industry, COUNT(*) AS event_count FROM layoffs GROUP BY industry HAVING event_count > 1 ORDER BY event_count DESC LIMIT 10;",
+        "answer": "Tech, Retail, and Media industries are frequently affected by layoffs across different quarters.",
+        "visualization": "horizontal_bar",
+        "follow_ups": [
+          {
+            "question": "How have layoffs in these industries changed over time?",
+            "sql_query": "SELECT strftime('%Y-%m', date) AS Month, industry, COUNT(*) AS events FROM layoffs GROUP BY Month, industry ORDER BY Month DESC LIMIT 20;",
+            "answer": "Tech layoffs spiked post-pandemic due to cost corrections; retail layoffs show cyclical patterns.",
+            "visualization": "line_chart"
+          },
+          {
+            "question": "Why do some industries face consistent layoffs?",
+            "answer": "Industries like tech and retail face consistent layoffs due to rapid changes in consumer trends and digital disruptions. In tech, overhiring during boom periods often leads to mass corrections during downturns. Retail suffers from shifting buyer preferences, e-commerce pressure, and seasonal variability. Such structural factors make these industries more volatile in terms of employment stability."
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "question": "Are early-stage startups at higher risk of layoffs compared to mature companies?",
+        "sql_query": "SELECT stage, AVG(percentage) AS avg_layoff FROM layoffs WHERE stage IS NOT NULL GROUP BY stage ORDER BY avg_layoff DESC;",
+        "answer": "Early-stage startups tend to have higher average layoffs due to unstable revenue and funding pressures.",
+        "visualization": "pie_chart",
+        "follow_ups": [
+          {
+            "question": "Which startup stages saw the largest number of layoffs over time?",
+            "sql_query": "SELECT strftime('%Y-%m', date) AS Month, stage, SUM(laid_off_count) AS layoffs FROM layoffs WHERE stage IS NOT NULL GROUP BY Month, stage ORDER BY Month DESC LIMIT 20;",
+            "answer": "Seed and Series A startups reported large layoffs during investment slowdowns in 2022–2023.",
+            "visualization": "line_chart"
+          },
+          {
+            "question": "Why do early-stage startups face higher layoff volatility?",
+            "answer": "Early-stage startups often operate on limited financial runways and depend heavily on investor funding. When expected rounds are delayed or missed, cutting workforce becomes a survival tactic. Additionally, their business models are often untested, making them prone to pivot frequently. This leads to rapid changes in team needs and frequent restructuring, resulting in more layoffs."
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -1,79 +1,83 @@
 [
-  {
-    "question": "Which month recorded the highest number of layoffs?",
-    "sql_query": "SELECT strftime('%Y-%m', Date) AS Month, COUNT(*) AS Total_Layoffs FROM layoffs GROUP BY Month ORDER BY Total_Layoffs DESC LIMIT 1;",
-    "insight": "This helps identify peak layoff periods which may indicate economic downturns or industry-wide corrections.",
-    "reasoning": "We used SQLite's `strftime` to group by year and month from the 'Date' column. The `COUNT(*)` calculates total layoff events per month.",
-    "conclusion": "This month experienced the most significant layoff events, possibly due to external economic pressures.",
-    "follow_ups": [
-      {
-        "question": "What were the top 5 months with the highest number of layoffs?",
-        "sql_query": "SELECT strftime('%Y-%m', Date) AS Month, COUNT(*) AS Total_Layoffs FROM layoffs GROUP BY Month ORDER BY Total_Layoffs DESC LIMIT 5;",
-        "insight": "These months reflect recurring trends or unusual spikes in job cuts."
-      },
-        {
-          "question": "What was the total number of layoffs in the top month?",
-          "sql_query": "SELECT strftime('%Y-%m', Date) AS Month, SUM(Laid_Off_Count) AS Total_Layoffs FROM layoffs GROUP BY Month ORDER BY Total_Layoffs DESC LIMIT 1;",
-          "insight": "This shows the peak layoff month with the total number of employees laid off.",
-          "conclusion": "The highest number of layoffs occurred in the given month, reflecting a major workforce reduction."
-        }
-    ]
-  },
-  {
-    "question": "Which company has laid off the most employees overall?",
-    "sql_query": "SELECT Company, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs GROUP BY Company ORDER BY Total_Laid_Off DESC LIMIT 1;",
-    "insight": "Identifies the single company with the largest cumulative layoffs.",
-    "reasoning": "We grouped all records by company and used SUM on the 'Laid_Off_Count' to find the total laid off per company.",
-    "conclusion": "This company has contributed the most to layoffs in the dataset.",
-    "follow_ups": [
-      {
-        "question": "Top 5 companies with the most layoffs?",
-        "sql_query": "SELECT Company, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs GROUP BY Company ORDER BY Total_Laid_Off DESC LIMIT 5;",
-        "insight": "These companies account for the highest layoff volumes and could represent industry leaders under stress."
-      },
-      {
-        "question": "Which industry do these top companies belong to?",
-        "sql_query": "SELECT Company, Industry FROM layoffs WHERE Company IN (SELECT Company FROM layoffs GROUP BY Company ORDER BY SUM(Laid_Off_Count) DESC LIMIT 5);",
-        "insight": "Links layoffs to industry trends, giving insight into which sectors were impacted most."
-      }
-    ]
-  },
-  {
-    "question": "Which industry saw the highest layoffs?",
-    "sql_query": "SELECT Industry, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs GROUP BY Industry ORDER BY Total_Laid_Off DESC LIMIT 1;",
-    "insight": "This highlights the most affected industry by total layoffs.",
-    "reasoning": "Grouping by 'Industry' and summing layoffs gives us the overall industry impact.",
-    "conclusion": "This industry suffered the most, possibly due to structural changes or reduced demand.",
-    "follow_ups": [
-      {
-        "question": "Top 3 industries affected the most?",
-        "sql_query": "SELECT Industry, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs GROUP BY Industry ORDER BY Total_Laid_Off DESC LIMIT 3;",
-        "insight": "Shows how layoffs were concentrated across industries."
-      },
-      {
-        "question": "Which company in that industry laid off the most?",
-        "sql_query": "SELECT Company, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs WHERE Industry = (SELECT Industry FROM layoffs GROUP BY Industry ORDER BY SUM(Laid_Off_Count) DESC LIMIT 1) GROUP BY Company ORDER BY Total_Laid_Off DESC LIMIT 1;",
-        "insight": "Pinpoints the leading contributor to layoffs in the most affected industry."
-      }
-    ]
-  },
-  {
-    "question": "Which country reported the highest layoffs?",
-    "sql_query": "SELECT Country, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs GROUP BY Country ORDER BY Total_Laid_Off DESC LIMIT 1;",
-    "insight": "This gives a global view of which nation experienced the most layoffs.",
-    "reasoning": "Grouped by country to identify national layoff impact.",
-    "conclusion": "The country with highest layoffs reflects either economic stress or data concentration.",
-    "follow_ups": [
-      {
-        "question": "Top 5 countries with highest layoffs?",
-        "sql_query": "SELECT Country, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs GROUP BY Country ORDER BY Total_Laid_Off DESC LIMIT 5;",
-        "insight": "These regions saw the most significant workforce reductions globally."
-      },
-      {
-        "question": "Which industry had the highest layoffs in that country?",
-        "sql_query": "SELECT Industry, SUM(Laid_Off_Count) AS Total_Laid_Off FROM layoffs WHERE Country = (SELECT Country FROM layoffs GROUP BY Country ORDER BY SUM(Laid_Off_Count) DESC LIMIT 1) GROUP BY Industry ORDER BY Total_Laid_Off DESC LIMIT 1;",
-        "insight": "Reveals industry-level impact for the most affected country."
-      }
-    ]
-  }
+    {
+        "category": "Layoff Trends",
+        "questions": [
+            {
+                "id": 1,
+                "question": "What are the monthly trends of layoffs in recent years?",
+                "sql_query": "SELECT strftime('%Y-%m', date) AS Month, COUNT(*) AS Layoff_Count FROM layoffs GROUP BY Month ORDER BY Month;",
+                "answer": "Layoffs often spike at the start of fiscal quarters, especially during economic downturns.",
+                "visualization": "line_chart",
+                "follow_ups": [
+                    {
+                        "question": "Which quarter had the highest number of layoffs?",
+                        "sql_query": "SELECT strftime('%Y-Q', date) AS Quarter, COUNT(*) AS Layoff_Count FROM layoffs GROUP BY Quarter ORDER BY Layoff_Count DESC LIMIT 1;",
+                        "answer": "The highest layoffs occurred during Q2 of 2023, largely due to tech industry downsizing.",
+                        "visualization": "bar_chart"
+                    },
+                    {
+                        "question": "Are layoffs increasing or decreasing over time?",
+                        "sql_query": "SELECT strftime('%Y-%m', date) AS Month, COUNT(*) AS Layoff_Count FROM layoffs GROUP BY Month ORDER BY Month;",
+                        "answer": "Layoffs peaked in 2023 and started to decline slightly in 2024.",
+                        "visualization": "line_chart"
+                    }
+                ]
+            },
+            {
+                "id": 2,
+                "question": "Which year had the most layoffs overall?",
+                "sql_query": "SELECT strftime('%Y', date) AS Year, COUNT(*) AS Total_Layoffs FROM layoffs GROUP BY Year ORDER BY Total_Layoffs DESC LIMIT 1;",
+                "answer": "2023 had the most layoffs, primarily due to global economic uncertainty.",
+                "visualization": "bar_chart",
+                "follow_ups": [
+                    {
+                        "question": "Which sectors were most affected in that year?",
+                        "sql_query": "SELECT industry, COUNT(*) AS Layoff_Count FROM layoffs WHERE strftime('%Y', date) = '2023' GROUP BY industry ORDER BY Layoff_Count DESC LIMIT 5;",
+                        "answer": "Technology, finance, and retail sectors saw the highest layoffs.",
+                        "visualization": "bar_chart"
+                    },
+                    {
+                        "question": "Did the layoff numbers correlate with stock market trends?",
+                        "answer": "Yes, major layoff events coincided with stock market dips, especially for tech companies. These layoffs were often seen after sharp drops in company valuations. Many companies used workforce reductions to signal a focus on profitability to investors. In some cases, this boosted short-term stock performance. However, long-term confidence usually depended on restructuring effectiveness. Thus, layoffs both influenced and were influenced by market trends."
+                    }
+                ]
+            },
+            {
+                "id": 3,
+                "question": "How have layoffs varied over time across industries?",
+                "sql_query": "SELECT strftime('%Y-%m', date) AS Month, industry, COUNT(*) AS Layoff_Count FROM layoffs GROUP BY Month, industry ORDER BY Month;",
+                "answer": "Some industries like tech saw sharp rises in 2023, while others like manufacturing remained stable.",
+                "visualization": "line_chart",
+                "follow_ups": [
+                    {
+                        "question": "Which industry recovered fastest post-2023 layoffs?",
+                        "sql_query": "SELECT industry, COUNT(*) AS Layoff_Count FROM layoffs WHERE strftime('%Y', date) = '2024' GROUP BY industry ORDER BY Layoff_Count ASC LIMIT 3;",
+                        "answer": "Healthcare and education showed resilience with minimal layoffs after 2023.",
+                        "visualization": "bar_chart"
+                    },
+                    {
+                        "question": "Were there industries consistently impacted year over year?",
+                        "answer": "Yes, technology and retail have consistently faced layoffs across the past three years. This reflects both over-expansion and shifting customer behavior. Recurring layoffs indicate structural issues or outdated business models in these sectors. In particular, the retail sector faced rising e-commerce competition and changing consumer preferences. Tech firms, meanwhile, were affected by hiring booms that outpaced demand. As markets corrected, these industries struggled to stabilize. Some industries are in prolonged transition, not temporary crisis."
+                    }
+                ]
+            },
+            {
+                "id": 4,
+                "question": "Which companies had layoffs in the most recent quarter?",
+                "sql_query": "SELECT company, date FROM layoffs WHERE date >= DATE('now', '-3 months') ORDER BY date DESC;",
+                "answer": "Companies like Google, Salesforce, and Shopify conducted layoffs in the recent quarter.",
+                "visualization": "bar_chart",
+                "follow_ups": [
+                    {
+                        "question": "What might justify such large layoffs in one go?",
+                        "answer": "Companies often restructure for cost-saving, adopt automation, or respond to declining revenues. Mass layoffs are usually strategic and aimed at improving financial efficiency. In some cases, they prepare the firm for acquisitions or investor pressure. The trend is especially common in tech, where rapid scaling is followed by rapid downsizing. Firms reassess talent needs in light of new technologies or shifting priorities."
+                    },
+                    {
+                        "question": "Did these layoffs align with earnings reports?",
+                        "answer": "Yes, many layoffs were announced shortly before or after poor quarterly earnings. Companies tend to time these announcements to signal action to shareholders. Poor financial performance forces leadership to take decisive measures. Layoffs can help boost stock sentiment in the short term. However, repeated layoffs may erode employee morale and public trust."
+                    }
+                ]
+            }
+        ]
+    }
 ]
