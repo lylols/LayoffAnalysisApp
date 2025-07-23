@@ -36,22 +36,39 @@ This interactive Streamlit web application enables HR professionals, data analys
 
 ## Folder Structure
 
-layoff-analysis-app/
-├── app.py
-├── layoff.db
-├── README.md
-├── json_data/
-│   ├── company_insights.json
-│   ├── high_risk_segments.json
-│   ├── layoff_trends.json
-│   ├── startup_stability.json
-│   └── time_based_trends.json
+- app.py: Main Streamlit application
 
+- layoff.db: SQLite database containing layoff data
+
+- README.md: Project documentation
+
+- json_data/: Contains JSON files for each analysis category:
+
+    - company_insights.json
+
+    - high_risk_segments.json
+
+    - layoff_trends.json
+
+    - startup_stability.json
+
+    - time_based_trends.json
 
 ## How to Run the Project Locally
 
-1. **Clone the repository:**
-
-```bash
+### 1. Clone the GitHub repository
 git clone https://github.com/lylols/layoff-analysis-app.git
 cd layoff-analysis-app
+
+### 2. (Optional but recommended) Create and activate a virtual environment
+python -m venv venv
+venv\Scripts\activate   # For Windows
+### source venv/bin/activate  # For macOS/Linux
+
+### 3. Install the dependencies
+pip install -r requirements.txt
+
+### 4. Run the Streamlit app
+streamlit run app.py
+
+The app will open in your browser at http://localhost:8501
