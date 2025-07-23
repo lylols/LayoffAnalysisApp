@@ -140,15 +140,19 @@ else:
 
         df = pd.read_sql_query(query, conn)
         st.subheader("Result")
+
+        # ---- Filter Option (text columns) ----
+        if not df.empty:
+            text_cols = df.select_dtypes(include='object').columns.tolist()
+            if text_cols:
+                filter_col = st.selectbox("Choose column to filter", text_cols)
+                user_filter = st.text_input(f"Filter {filter_col}", "")
+                if user_filter:
+                    df = df[df[filter_col].str.contains(user_filter, case=False, na=False)]
+
         st.dataframe(df)
 
-        with st.expander("View SQL Query"):
-            st.code(query, language="sql")
-
-        csv = df.to_csv(index=False).encode("utf-8")
-        st.download_button("Download CSV", csv, file_name="result.csv", mime="text/csv")
-
-        # Graph
+        # Chart
         if len(df) > 1 and len(df.columns) >= 2 and df[df.columns[1]].dtype in ["int64", "float64"]:
             x_col = df.columns[0].lower()
             if any(key in x_col for key in ["month", "year", "date"]):
@@ -156,6 +160,24 @@ else:
             else:
                 fig = px.bar(df, x=df.columns[0], y=df.columns[1], title="Graphical Representation")
             st.plotly_chart(fig)
+
+        # ---- Recommendation Block ----
+        if "Total_Layoffs" in df.columns:
+            max_layoff = df["Total_Layoffs"].max()
+            top_row = df.loc[df["Total_Layoffs"].idxmax()]
+            try:
+                top_entity = top_row[text_cols[0]] if text_cols else "Top Category"
+                st.info(f"📊 **Highest Layoffs:** {int(max_layoff)} in **{top_entity}**")
+                if max_layoff > 1000:
+                    st.warning("⚠️ High layoffs detected!! May indicate scaling or structural changes.")
+            except:
+                pass
+
+        with st.expander("View SQL Query"):
+            st.code(query, language="sql")
+
+        csv = df.to_csv(index=False).encode("utf-8")
+        st.download_button("Download CSV", csv, file_name="result.csv", mime="text/csv")
 
     except Exception as e:
         st.error(f"Error: {e}")
