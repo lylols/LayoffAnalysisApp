@@ -1,0 +1,37 @@
+[
+  {
+    "section": "Funding & Stage Impact",
+    "description": "This section explores the relationship between layoffs and two financial indicators: total funds raised and company stage (e.g., Series A to F).",
+    "type": "toggle",
+    "questions": [
+      {
+        "question": "Layoffs vs Funding Raised",
+        "sql_query": "SELECT CASE WHEN Funds_Raised < 50 THEN '< 50M' WHEN Funds_Raised BETWEEN 50 AND 200 THEN '50M - 200M' WHEN Funds_Raised BETWEEN 200 AND 500 THEN '200M - 500M' ELSE '> 500M' END AS Funding_Band, SUM(Laid_Off_Count) AS Total_Layoffs FROM layoffs WHERE Funds_Raised IS NOT NULL GROUP BY Funding_Band ORDER BY CASE WHEN Funding_Band = '< 50M' THEN 1 WHEN Funding_Band = '50M - 200M' THEN 2 WHEN Funding_Band = '200M - 500M' THEN 3 ELSE 4 END;",
+        "chart_type": "bar",
+        "x_axis": "Funding_Band",
+        "y_axis": "Total_Layoffs",
+        "insights": [
+          "Companies with mid-range funding (50M–200M) show higher layoff numbers.",
+          "The lowest layoffs occurred in the <50M range, possibly due to smaller team sizes.",
+          "Enterprises with >500M funding may exhibit resilience but still contribute significantly to total layoffs.",
+          "This visualization helps relate financial backing to employee impact."
+        ]
+      },
+      {
+        "question": "Layoffs vs Company Stage",
+        "sql_query": "SELECT Stage, SUM(Laid_Off_Count) AS Total_Layoffs FROM layoffs WHERE Stage IS NOT NULL GROUP BY Stage ORDER BY Total_Layoffs DESC;",
+        "chart_type": "bar",
+        "x_axis": "Stage",
+        "y_axis": "Total_Layoffs",
+        "insights": [
+          "Series B and Series C companies have reported the highest layoffs.",
+          "Series A startups had fewer layoffs, likely due to smaller teams and tighter burn rate management.",
+          "Series F and later-stage companies also contributed significantly, possibly due to aggressive scaling and over-hiring.",
+          "Stage-wise layoffs show how risk and instability vary across the startup maturity spectrum.",
+          "Series A and B are early-stage; Series F and beyond represent mature, heavily funded companies often undergoing restructuring."
+        ]
+      }
+    ],
+    "extra_info": "Funding stages reflect a startup’s maturity. Early stages (Seed/Series A) are focused on product development. Series B and C involve scaling, while later stages like Series D-F prepare for IPO or acquisitions."
+  }
+]

@@ -4,6 +4,7 @@ import sqlite3
 import json
 import os
 import plotly.express as px
+import matplotlib.pyplot as plt
 
 # Page setup
 st.set_page_config(page_title="Layoff Analysis App", layout="wide")
@@ -17,8 +18,10 @@ categories = {
     "Layoff Trends": "layoff_trends.json",
     "Company-Specific Insights": "company_insights.json",
     "High-Risk Segments": "high_risk_segments.json",
+    "Funding & Stage Impact": "startup_stability.json",
     "Time-Based Trends": None  # Handled manually
 }
+
 selected_category = st.selectbox("Select Analysis Category", list(categories.keys()))
 st.markdown(f"**You selected: `{selected_category}`**")
 
@@ -158,7 +161,11 @@ else:
         st.error(f"Error: {e}")
 
     # Follow-up Section
-    follow_ups = question_data.get("follow_ups", [])
+    try:
+        follow_ups = question_data.get("follow_ups", [])
+    except NameError:
+        follow_ups = []
+
     if follow_ups:
         st.markdown("---")
         st.markdown("### Follow-Up Questions")
