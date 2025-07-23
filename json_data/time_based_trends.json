@@ -1,0 +1,74 @@
+{
+  "topic": "Time-Based Trends",
+  "filters": {
+    "time_range": {
+      "type": "slider",
+      "label": "Select Time Range",
+      "min_year": 2018,
+      "max_year": 2024
+    },
+    "granularity": {
+      "type": "selectbox",
+      "label": "Granularity",
+      "options": ["Monthly", "Quarterly", "Yearly"]
+    }
+  },
+  "follow_ups": [
+    {
+      "title": "Impact of COVID-19 on Layoffs",
+      "filters": [
+        {
+          "label": "Phase",
+          "type": "dropdown",
+          "options": ["All", "Pre-COVID", "During COVID", "Post-COVID"],
+          "default": "All"
+        }
+      ],
+      "visualization": {
+        "type": "bar",
+        "x": "Phase",
+        "y": "Layoff_Count",
+        "description": "Bar chart comparing layoffs during Pre-COVID, During COVID, and Post-COVID phases."
+      },
+      "theory": [
+        "Pre-COVID (Before 2020): Layoffs were relatively stable in this phase, with most companies operating under normal economic conditions. Tech expansion was on the rise, and job markets were thriving globally.",
+        "During COVID (2020–2021): This phase saw a massive surge in layoffs due to lockdowns, halted operations, and global uncertainty. Many startups shut down or paused hiring as survival became the top priority.",
+        "Post-COVID (2022 onward): Layoffs initially reduced as recovery started, but many companies continued workforce cuts due to restructuring or overhiring during the pandemic boom. The market shifted toward optimization and lean teams.",
+        "Overall Insight: The graph highlights a peak in layoffs during COVID-19, followed by a partial recovery. It reflects how drastically the pandemic disrupted global employment patterns across industries."
+      ],
+      "sql_query": "SELECT CASE WHEN strftime('%Y', Date) < '2020' THEN 'Pre-COVID' WHEN strftime('%Y', Date) BETWEEN '2020' AND '2021' THEN 'During COVID' ELSE 'Post-COVID' END AS Phase, COUNT(*) AS Layoff_Count FROM layoffs GROUP BY Phase ORDER BY CASE Phase WHEN 'Pre-COVID' THEN 1 WHEN 'During COVID' THEN 2 WHEN 'Post-COVID' THEN 3 END;"
+    },
+    {
+      "title": "Peak Year of Layoffs",
+      "visualization": {
+        "type": "bar",
+        "x": "Year",
+        "y": "Layoff_Count",
+        "description": "Bar showing the year with the highest number of layoffs."
+      },
+      "theory": [
+        "This insight highlights the year with the most layoffs in the dataset.",
+        "It helps correlate workforce reductions with major economic disruptions like COVID-19 or recessions.",
+        "Peaks in layoff data usually point toward economic turbulence or restructuring patterns in tech and startup ecosystems.",
+        "This helps HR teams analyze historical risks and plan accordingly."
+      ],
+      "sql_query": "SELECT strftime('%Y', Date) AS Year, COUNT(*) AS Layoff_Count FROM layoffs GROUP BY Year ORDER BY Layoff_Count DESC LIMIT 1;"
+    },
+    {
+      "title": "Recent 6-Month Layoff Trend",
+      "visualization": {
+        "type": "line",
+        "x": "Month",
+        "y": "Layoff_Count",
+        "description": "Trend line showing layoffs over the most recent 6-month period."
+      },
+      "theory": [
+        "This section gives insight into the most recent layoff patterns.",
+        "By analyzing the past 6 months, organizations can assess if layoff activity is rising or falling.",
+        "It's useful for tracking short-term employment trends and anticipating workforce shifts.",
+        "If there’s a consistent rise, it could signal upcoming instability in specific sectors."
+      ],
+      "sql_query": "SELECT strftime('%Y-%m', Date) AS Month, COUNT(*) AS Layoff_Count FROM layoffs WHERE Date >= date((SELECT MAX(Date) FROM layoffs), '-6 months') GROUP BY Month ORDER BY Month;"
+    }
+  ]
+}
