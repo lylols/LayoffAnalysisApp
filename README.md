@@ -14,12 +14,13 @@ This interactive Streamlit web application enables HR professionals, data analys
   - Department-Wise Insights
   - Time-Based Trends
   - Funding & Stage Impact
-- Smart dropdown system to select main category and follow-up questions
+- Smart dropdown system to select main categoryamong the forthmentioned
+- Questions related to the selected category alongwith 2-3 follow up questions covering a total of 45+ questions
 - SQL-based insights with the option to view underlying queries
 - Data visualizations using bar and line charts
 - Export filtered results to CSV
 - Dynamic filters and recommendations based on selection
-- Chat-style user interface powered by JSON configuration
+- Clean user Interface using streamlit 
 
 ---
 
