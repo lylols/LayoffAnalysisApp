@@ -3,6 +3,7 @@
 This interactive Streamlit web application enables HR professionals, data analysts, and business users to explore patterns in tech industry layoffs through user-friendly, SQL-powered insights.
 
 ---
+Check it out: https://layoffanalysisapp-dashboard.streamlit.app/
 
 ## Features
 
