@@ -11,8 +11,6 @@ Check it out: https://layoffanalysisapp-dashboard.streamlit.app/
   - Layoff Trends
   - Company-Specific Insights
   - High-Risk Segments
-  - Employee Metrics
-  - Department-Wise Insights
   - Time-Based Trends
   - Funding & Stage Impact
 - Smart dropdown system to select main categoryamong the forthmentioned
